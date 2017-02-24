@@ -149,21 +149,21 @@ end
 
 -- courtesy of SinisterRectus
 local function exec(arg, msg)
-	if not arg then return end -- make sure arg exists
+	if not arg then return end
 
-	arg = arg:gsub('```%w*\n?', '') -- strip markdown codeblocks
+	arg = arg:gsub('```%w*\n?', '')
 
 	local lines = {}
 
-	local sandbox = table.copy(_G) -- create a sandbox environment
+	local sandbox = table.copy(_G)
 	sandbox.message = msg
 	sandbox.client = client
 
-	sandbox.print = function(...) -- intercept printed lines with this
+	sandbox.print = function(...)
 		insert(lines, printLine(...))
 	end
 
-	sandbox.p = function(...) -- intercept pretty-printed lines with this
+	sandbox.p = function(...)
 		insert(lines, prettyLine(...))
 	end
 
@@ -173,14 +173,14 @@ local function exec(arg, msg)
 	local success, runtimeError = pcall(fn)
 	if not success then return msg:reply(code(runtimeError)) end
 
-	if #lines == 0 then return end
-	lines = concat(lines, '\n') -- bring all the lines together
+	if #lines == 0 then return msg:reply(code("Exec completed.")) end
+	lines = concat(lines, '\n')
 
-	if #lines > 1990 then -- truncate long messages
+	if #lines > 1990 then
 		lines = lines:sub(1, 1990)
 	end
 
-	return msg:reply(code(lines)) -- and send them as a message reply
+	return msg:reply(code(lines))
 end
 
 function commands.lua( message, arg )
@@ -204,7 +204,7 @@ function commands.calc( message, arg )
 
 	arg = "return (" .. arg .. ")"
 
-	local sandbox = table.copy(math)
+	local sandbox = setmetatable({}, {__index = math})
 
 	local fn, syntaxError = load(arg, 'Calc', 't', sandbox)
 	if not fn then return message:reply(code(syntaxError)) end
