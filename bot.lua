@@ -215,6 +215,31 @@ function commands.calc( message, arg )
 	return message:reply(code(tostring(result)))
 end
 
+local startingTime = os.date('!%Y-%m-%dT%H:%M:%S')
+local version = io.popen("git show-ref --head --abbrev --hash"):read()
+local hostname = io.popen("hostname"):read()
+
+function commands.info( message, arg )
+	local answer = { embed = {
+		author = {
+			name = message.author.name .. "'s selfbot",
+			icon_url = client.user.avatarUrl,
+		},
+		description = "https://github.com/Siapran/discord-selfbot",
+
+	}}
+	if hostname or version then
+		local info = {}
+		insert(info, hostname and ("Running on " .. hostname))
+		insert(info, version and ("Version " .. version))
+		answer.embed.footer = {
+			text = table.concat(info, " | "),
+		}
+	end
+	answer.embed.timestamp = startingTime
+	message:reply(answer)
+end
+
 client:on("ready", function()
 	log("Logged in as " .. client.user.username)
 end)
