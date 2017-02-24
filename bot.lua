@@ -191,7 +191,7 @@ function commands.cleanup( message, arg )
 	message.channel:loadMessages()
 	for msg in message.channel.messages do
 		if message.author == msg.author then
-			if msg.content:startswith("::lua") or msg.content:startswith("``") then
+			if msg.content:startswith("::") or msg.content:startswith("``") then
 				msg:delete()
 			end
 		end
