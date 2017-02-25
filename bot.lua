@@ -196,7 +196,6 @@ function commands.cleanup( message, arg )
 			end
 		end
 	end
-	message:delete()
 end
 
 function commands.calc( message, arg )
