@@ -1,4 +1,6 @@
 local discordia = require("discordia")
+local timer = require("timer")
+local querystring = require("querystring")
 local client = discordia.Client()
 
 local levenshtein = string.levenshtein
@@ -107,6 +109,14 @@ local commands = setmetatable({}, { __index = function( t, k )
 	end
 end})
 
+function commands.help( message, arg )
+	local answer = {embed = {
+		title = "Available commands",
+		description = "`" .. table.concat(table.keys(commands), "`, `") .. "`"
+	}}
+	message:reply(answer)
+end
+
 function commands.quote( message, arg )
 	local target = message.channel:getMessage("id", arg)
 	if not target then message.channel:loadMessages() end
@@ -158,6 +168,8 @@ local function exec(arg, msg)
 	local sandbox = table.copy(_G)
 	sandbox.message = msg
 	sandbox.client = client
+	sandbox.timer = timer
+	sandbox.querystring = querystring
 
 	sandbox.print = function(...)
 		insert(lines, printLine(...))
@@ -191,7 +203,7 @@ function commands.cleanup( message, arg )
 	message.channel:loadMessages()
 	for msg in message.channel.messages do
 		if message.author == msg.author then
-			if msg.content:startswith("::") or msg.content:startswith("``") then
+			if msg.content:startswith("::") or msg.content:startswith("```") then
 				msg:delete()
 			end
 		end
@@ -238,6 +250,16 @@ function commands.info( message, arg )
 	answer.embed.timestamp = startingTime
 	message:reply(answer)
 end
+
+
+function commands.lmgtfy( message, arg )
+	message:reply("http://lmgtfy.com/?" .. querystring.stringify({q = arg}))
+	message:delete()
+end
+
+
+
+
 
 client:on("ready", function()
 	log("Logged in as " .. client.user.username)
