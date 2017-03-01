@@ -1,11 +1,13 @@
 local discordia = require("discordia")
 local timer = require("timer")
 local querystring = require("querystring")
-local client = discordia.Client()
+local pp = require('pretty-print').prettyPrint
 
 local levenshtein = string.levenshtein
 local insert = table.insert
 local concat = table.concat
+
+local client = discordia.Client()
 
 local function log( ... )
 	print(os.date("[%x %X]"), ...)
@@ -117,28 +119,34 @@ function commands.help( message, arg )
 	message:reply(answer)
 end
 
-function commands.quote( message, arg )
-	local target = message.channel:getMessage("id", arg)
-	if not target then message.channel:loadMessages() end
-	target = message.channel:getMessage("id", arg)
-	if target then
-		log("Found quote: " .. target.id)
-		local answer = {embed = {
-			description = target.content,
-			author = {
-				name = target.author.name,
-				icon_url = target.author.avatarUrl
-			},
-		}}
-		message:reply(answer)
-	else
-		log("Quote not found.")
-	end
-	message:delete()
-end
+-- function commands.quote( message, arg )
+-- 	local target = message.channel:getMessage("id", arg)
+-- 	if not target then message.channel:loadMessages() end
+-- 	target = message.channel:getMessage("id", arg)
+-- 	if target then
+-- 		log("Found quote: " .. target.id)
+-- 		local answer = {embed = {
+-- 			description = target.content,
+-- 			author = {
+-- 				name = target.author.name,
+-- 				icon_url = target.author.avatarUrl
+-- 			},
+-- 		}}
+-- 		message:reply(answer)
+-- 	else
+-- 		log("Quote not found.")
+-- 	end
+-- 	message:delete()
+-- end
 
 function commands.quote( message, arg )
 	local channel = message.channel
+	local args = arg:split("%s+")
+	if #args > 1 then
+		arg = args[1]
+		channel = client:getChannel("id", args[2])
+		if not channel then return message:delete() end
+	end
 	local target = channel:getMessage("id", arg)
 	if not target then
 		for msg in channel:getMessageHistoryAround({_id = arg}, 2) do
@@ -156,12 +164,27 @@ function commands.quote( message, arg )
 				name = target.author.name,
 				icon_url = target.author.avatarUrl
 			},
+			timestamp = os.date('!%Y-%m-%dT%H:%M:%S', target.createdAt),
 		}}
+
+		if message.channel ~= channel then
+			if message.guild ~= channel.guild then
+				answer.embed.footer = {
+					text = "On " .. channel.guild.name .. " | #" .. channel.name,
+					icon_url = channel.guild.iconUrl,
+				}
+			else
+				answer.embed.footer = {
+					text = "On #" .. channel.name,
+				}
+			end
+		end
+		
 		message:reply(answer)
 	else
 		log("Quote not found.")
 	end
-	message:delete()
+	return message:delete()
 end
 
 local function printLine(...)
@@ -172,8 +195,6 @@ local function printLine(...)
 	end
 	return concat(ret, '\t')
 end
-
-local pp = require('pretty-print')
 
 local function prettyLine(...)
 	local ret = {}
@@ -283,9 +304,6 @@ function commands.lmgtfy( message, arg )
 	message:reply("http://lmgtfy.com/?" .. querystring.stringify({q = arg}))
 	message:delete()
 end
-
-
-
 
 
 client:on("ready", function()

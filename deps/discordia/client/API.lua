@@ -138,9 +138,9 @@ function API:commit(method, url, reqHeaders, payload, routeMutex, attempts)
 	local shouldRetry = false
 
 	if not success then
-		self._client:warning(format('%i / %s / %s\n%s %s', res.code, res.reason, data.message, method, url))
+		self._client:warning(format('%i / %s / %s\n%s %s', res.code, res.reason, data and data.message, method, url))
 		if res.code == 429 then
-			if data.global then
+			if data and data.global then
 				if not self._globally_limited then
 					if not globalMutex._active then
 						globalMutex:lock(isRetry)
