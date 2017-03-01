@@ -9,6 +9,10 @@ local concat = table.concat
 
 local client = discordia.Client()
 
+local startingTime = os.date('!%Y-%m-%dT%H:%M:%S')
+local version = io.popen("git show-ref --head --abbrev --hash"):read()
+local hostname = io.popen("hostname"):read()
+
 local function log( ... )
 	print(os.date("[%x %X]"), ...)
 end
@@ -100,9 +104,6 @@ end
 local function code(str)
 	return string.format('```\n%s```', str)
 end
-
-local startingTime = os.date('!%Y-%m-%dT%H:%M:%S')
-local hostname = io.popen("hostname"):read()
 
 local commands = setmetatable({}, { __index = function( t, k )
 	return function( message, arg )
@@ -273,10 +274,6 @@ function commands.calc( message, arg )
 
 	return message:reply(code(tostring(result)))
 end
-
-local startingTime = os.date('!%Y-%m-%dT%H:%M:%S')
-local version = io.popen("git show-ref --head --abbrev --hash"):read()
-local hostname = io.popen("hostname"):read()
 
 function commands.info( message, arg )
 	local answer = { embed = {
