@@ -95,7 +95,7 @@ end
 
 -- this will adapt a token with or without a Bot prefix
 -- future versions may require explicit prefixing
-local function parseToken(self, token)
+function Client:_parseToken(token)
 	local api = self._api
 	token = token:gsub('Bot ', '')
 	local bot = 'Bot ' .. token
@@ -103,6 +103,8 @@ local function parseToken(self, token)
 		return bot, true
 	elseif api:checkToken(token) then
 		return token, false
+	else
+		return self:error('Invalid token provided')
 	end
 end
 
@@ -112,9 +114,8 @@ local function run(self, token, other)
 		if other then
 			token, isBot = getToken(self, token, other)
 		else
-			token, isBot = parseToken(self, token)
+			token, isBot = self:_parseToken(token)
 		end
-		if not token then return self:error('Invalid token provided') end
 		self._api:setToken(token)
 		return self:_connectToGateway(token, isBot)
 	end)()
@@ -167,7 +168,7 @@ function Client:_connectToGateway(token, isBot)
 	else
 		self:error(format('Cannot get gateway URL: %s', data.message))
 	end
-	
+
 end
 
 function Client:_loadUserData(data)
@@ -211,7 +212,7 @@ local function setUsername(self, username)
 	return success
 end
 
-local function setNick(self, guild, nick)
+local function setNickname(self, guild, nick)
 	local success, data = self._api:modifyCurrentUserNickname(guild._id, {
 		nick = nick or ''
 	})
@@ -799,7 +800,7 @@ method('acceptInvite', acceptInvite, 'code', "Accepts a guild invitation with th
 method('getInvite', getInvite, 'code', "Returns an Invite object corresponding to a raw invite code, if it exists.")
 
 method('setUsername', setUsername, 'username', "Sets the user's username.")
-method('setNickname', setNick, 'guild, nickname', "Sets the user's nickname for the indicated guild.")
+method('setNickname', setNickname, 'guild, nickname', "Sets the user's nickname for the indicated guild.")
 method('setAvatar', setAvatar, 'avatar', "Sets the user's avatar. Must be a base64-encoded JPEG.")
 method('setStatusIdle', setStatusIdle, nil, "Sets the user status to idle. Warning: This can silently fail!")
 method('setStatusOnline', setStatusOnline, nil, "Sets the user status to idle. Warning: This can silently fail!")

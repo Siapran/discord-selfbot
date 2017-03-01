@@ -39,12 +39,12 @@ function Member:_updatePresence(data)
 	self._user:_update(data.user)
 end
 
-local function setNick(self, nick)
+local function setNickname(self, nick)
 	nick = nick or ''
 	local guild = self._parent
 	local client = guild._parent
 	if self._user._id == client._user._id then
-		return client:setNick(guild, nick)
+		return client:setNickname(guild, nick)
 	end
 	local success = client._api:modifyGuildMember(guild._id, self._user._id, {nick = nick})
 	if success then self._nick = nick end
@@ -285,7 +285,7 @@ property('discriminator', function(self) return self._user._discriminator end, n
 property('status', getStatus, nil, 'string', "Whether the member is online, offline, or idle")
 property('gameName', getGameName, nil, 'string', "Name of the game set in the member's status (can be nil if not set)")
 property('name', getName, nil, 'string', "The member's nickname if one is set. Otherwise, its username.")
-property('nickname', '_nick', setNick, 'string', "The member's nickname for the guild in which it exists (can be nil if not set)")
+property('nickname', '_nick', setNickname, 'string', "The member's nickname for the guild in which it exists (can be nil if not set)")
 property('user', '_user', nil, 'User', "The base user associated with this member")
 property('guild', '_parent', nil, 'Guild', "The guild in which this member exists")
 property('joinedAt', '_joined_at', nil, 'string', "Date and time when the member joined the guild")
@@ -303,7 +303,7 @@ method('addRole', addRole, 'role', "Adds a role to the member.")
 method('addRoles', addRoles, 'roles[, ...]', "Adds a role or roles to the member.")
 method('removeRole', removeRole, 'role', "Removes a role from the member.")
 method('removeRoles', removeRoles, 'roles[, ...]', "Removes a role or roles from the member.")
-method('hasRole', hasRole, 'roles', "Returns whether the member has a role.")
+method('hasRole', hasRole, 'role', "Returns whether the member has a role.")
 method('hasRoles', hasRoles, 'roles[, ...]', "Returns whether the member has a role or roles.")
 
 cache('Role', getRoleCount, getRole, getRoles, findRole, findRoles)

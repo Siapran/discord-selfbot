@@ -137,6 +137,33 @@ function commands.quote( message, arg )
 	message:delete()
 end
 
+function commands.quote( message, arg )
+	local channel = message.channel
+	local target = channel:getMessage("id", arg)
+	if not target then
+		for msg in channel:getMessageHistoryAround({_id = arg}, 2) do
+		    if msg.id == arg then
+		    	target = msg
+		    	break
+		    end
+		end
+	end
+	if target then
+		log("Found quote: " .. target.id)
+		local answer = {embed = {
+			description = target.content,
+			author = {
+				name = target.author.name,
+				icon_url = target.author.avatarUrl
+			},
+		}}
+		message:reply(answer)
+	else
+		log("Quote not found.")
+	end
+	message:delete()
+end
+
 local function printLine(...)
 	local ret = {}
 	for i = 1, select('#', ...) do
@@ -272,7 +299,7 @@ client:on("messageCreate", function(message)
 	if message.author ~= client.user then return end
 	if not message.content:startswith("::") then return end
 	log("Command: " .. message.content)
-	local cmd, arg = message.content:match('(%S+)%s+(.*)')
+	local cmd, arg = message.content:match("(%S+)%s+(.*)")
 	cmd = cmd or message.content
 	cmd = cmd:sub(3)
 
