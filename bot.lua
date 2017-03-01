@@ -1,7 +1,7 @@
 local discordia = require("discordia")
 local timer = require("timer")
 local querystring = require("querystring")
-local pp = require('pretty-print').prettyPrint
+local pp = require('pretty-print')
 
 local levenshtein = string.levenshtein
 local insert = table.insert
