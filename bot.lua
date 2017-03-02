@@ -9,15 +9,25 @@ local concat = table.concat
 
 local client = discordia.Client()
 
+local prefix = "::"
 local startingTime = os.date('!%Y-%m-%dT%H:%M:%S')
 local version = io.popen("git show-ref --head --abbrev --hash"):read()
 local hostname = io.popen("hostname"):read()
+
+-- courtesy of Magicks
+getmetatable("").__div = function(str, pattern)
+	local matches = {}
+	for match in str:gmatch(pattern) do
+		table.insert(matches, match)
+	end
+	return matches
+end
 
 local function log( ... )
 	print(os.date("[%x %X]"), ...)
 end
 
--- thanks SinisterRectus for this wonder
+-- courtesy of SinisterRectus
 local function fuzzySearch(guild, arg)
 	local member = guild:getMember('id', arg)
 	if member then return member end
@@ -120,29 +130,10 @@ function commands.help( message, arg )
 	message:reply(answer)
 end
 
--- function commands.quote( message, arg )
--- 	local target = message.channel:getMessage("id", arg)
--- 	if not target then message.channel:loadMessages() end
--- 	target = message.channel:getMessage("id", arg)
--- 	if target then
--- 		log("Found quote: " .. target.id)
--- 		local answer = {embed = {
--- 			description = target.content,
--- 			author = {
--- 				name = target.author.name,
--- 				icon_url = target.author.avatarUrl
--- 			},
--- 		}}
--- 		message:reply(answer)
--- 	else
--- 		log("Quote not found.")
--- 	end
--- 	message:delete()
--- end
 
 function commands.quote( message, arg )
 	local channel = message.channel
-	local args = arg:split("%s+")
+	local args = arg / "(%S+)"
 	if #args > 1 then
 		arg = args[1]
 		channel = client:getChannel("id", args[2])
@@ -252,7 +243,7 @@ function commands.cleanup( message, arg )
 	message.channel:loadMessages()
 	for msg in message.channel.messages do
 		if message.author == msg.author then
-			if msg.content:startswith("::") or msg.content:startswith("```") then
+			if msg.content:startswith(prefix) or msg.content:startswith("```") then
 				msg:delete()
 			end
 		end
@@ -312,13 +303,15 @@ end)
 
 client:on("messageCreate", function(message)
 	if message.author ~= client.user then return end
-	if not message.content:startswith("::") then return end
+	if not message.content:startswith(prefix) then return end
 	log("Command: " .. message.content)
-	local cmd, arg = message.content:match("(%S+)%s+(.*)")
-	cmd = cmd or message.content
-	cmd = cmd:sub(3)
-
-	commands[cmd](message, arg)
+	local cmd, arg =
+		message.content
+		:sub(prefix:len() + 1)
+		:match("(%S+)%s*(.*)")
+	if(cmd) then
+		commands[cmd](message, arg)
+	end
 end)
 
 if args[2] then
