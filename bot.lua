@@ -287,6 +287,18 @@ function commands.info( message, arg )
 	message:reply(answer)
 end
 
+function commands.version( message, arg )
+	local lines = {}
+	for line in io.popen('git log --pretty=format:"%H %h %s" -n6'):lines() do
+		local hash, abbrev, commit_msg = line:match("(%S+) (%S+) (.+)")
+		insert(lines, ("**[%s](https://github.com/Siapran/discord-selfbot/commit/%s)**: %s"):format(abbrev, hash, commit_msg))
+	end
+	local answer = { embed = {
+		title = "Version History",
+		description = table.concat(lines, "\n"),
+	}}
+	message:reply(answer)
+end
 
 function commands.lmgtfy( message, arg )
 	message:reply("http://lmgtfy.com/?" .. querystring.stringify({q = arg}))
