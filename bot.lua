@@ -334,3 +334,4 @@ else
 end
 
 client:run(args[2])
+args[2] = "TOKEN"
