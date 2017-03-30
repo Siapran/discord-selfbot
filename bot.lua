@@ -153,7 +153,7 @@ function commands.quote( message, arg )
 		local answer = {embed = {
 			description = target.content,
 			author = {
-				name = target.author.name,
+				name = target.member and target.member.name or target.author.name,
 				icon_url = target.author.avatarUrl
 			},
 			timestamp = os.date('!%Y-%m-%dT%H:%M:%S', target.createdAt),
