@@ -273,7 +273,7 @@ function commands.tex( message, arg )
 
 	local tmpdir = io.popen("mktemp -d"):read()
 	local texfile = io.open(tmpdir .. "/tex-output.tex", "w")
-	texfile:write([[\documentclass[border=0.50001bp]{standalone}
+	texfile:write([[\documentclass[border=0.50001bp,varwidth=true]{standalone}
 \begin{document}
 ]] .. arg .. [[
 \end{document}
