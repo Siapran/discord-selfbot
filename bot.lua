@@ -123,7 +123,7 @@ local commands = setmetatable({}, { __index = function( t, k )
 end})
 
 function commands.help( message, arg )
-	local answer = {embed = {
+	local answer = { embed = {
 		title = "Available commands",
 		description = "`" .. table.concat(table.keys(commands), "`, `") .. "`"
 	}}
@@ -150,7 +150,7 @@ function commands.quote( message, arg )
 	end
 	if target then
 		log("Found quote: " .. target.id)
-		local answer = {embed = {
+		local answer = { embed = {
 			description = target.content,
 			author = {
 				name = target.member and target.member.name or target.author.name,
@@ -324,6 +324,30 @@ function commands.lmgtfy( message, arg )
 	message:delete()
 end
 
+local format = {}
+function format.spaced( arg )
+	local chars = arg:split()
+	return table.concat(chars, " ")
+end
+function format.juggalo( arg )
+	local chars = arg:split()
+	local upper = true
+	for i,c in ipairs(chars) do
+		if c:match("%a") then
+			chars[i] = upper and c:upper() or c:lower()
+			upper = not upper
+		end
+	end
+	return table.concat(chars)
+end
+
+function commands.format( message, arg )
+	local param, arg = arg:match("(%S+)%s*(.*)")
+	print(param, arg)
+	if format[param] then message:reply(format[param](arg)) end
+	message:delete()
+end
+
 
 client:on("ready", function()
 	log("Logged in as " .. client.user.username)
@@ -340,7 +364,7 @@ client:on("messageCreate", function(message)
 		message.content
 		:sub(prefix:len() + 1)
 		:match("(%S+)%s*(.*)")
-	if(cmd) then
+	if cmd then
 		commands[cmd](message, arg)
 	end
 end)
