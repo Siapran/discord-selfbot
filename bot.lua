@@ -340,11 +340,21 @@ function format.juggalo( arg )
 	end
 	return table.concat(chars)
 end
+local emotes = {
+	-- courtesy of LazyShpee
+	lenny = '( ͡° ͜ʖ ͡°)',
+	shrug = '¯\\_(ツ)_/¯',
+}
+function format.emote( arg )
+	return emotes[arg] or ""
+end
 
 function commands.format( message, arg )
-	local param, arg = arg:match("(%S+)%s*(.*)")
-	print(param, arg)
-	if format[param] then message:reply(format[param](arg)) end
+	arg = arg:gsub("{{(.-)}}", function ( capture )
+		local param, arg = capture:match("(%S+)%s*(.*)")
+		return format[param] and format[param](arg) or arg
+	end)
+	message:reply(arg)
 	message:delete()
 end
 
