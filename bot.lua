@@ -160,7 +160,7 @@ function commands.quote( message, arg )
 		}}
 
 		if message.channel ~= channel then
-			if message.guild ~= channel.guild then
+			if channel. guild and message.guild ~= channel.guild then
 				answer.embed.footer = {
 					text = "On " .. channel.guild.name .. " | #" .. channel.name,
 					icon_url = channel.guild.iconUrl,
